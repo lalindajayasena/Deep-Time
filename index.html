@@ -3,6 +3,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>Deep Time</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c1b1a">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root{--bg:#1c1b1a;--card:#262422;--line:#3a3733;--tx:#e8dfcc;--mu:#a39a88;--ac:#c9b38a;--ok:#8fb08a;--bad:#c97b6b;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -33,6 +37,10 @@ nav span{display:block;font-size:20px}
 input,textarea{width:100%;background:#141312;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:10px;font:16px Georgia,serif;margin:4px 0}
 .back{background:none;border:0;color:var(--ac);padding:0;font:14px system-ui,sans-serif}
 dt{color:var(--ac);margin-top:8px}dd{margin:0 0 0 12px}
+.ck{display:block;width:100%;max-width:320px;margin:0 auto}
+.ev{display:flex;gap:10px;padding:8px;border-radius:8px;border:1px solid transparent;font:14px/1.3 system-ui,sans-serif}
+.ev b{min-width:62px;color:var(--ac)}
+.ev.on{border-color:var(--ac);background:#2e2b27}
 </style></head><body><div id="app"></div>
 <nav id="nav"></nav>
 <script>
@@ -73,12 +81,39 @@ function pick(l,q,o){D.ans[l]=D.ans[l]||{};if(D.ans[l][q]!==undefined)return;D.a
 function toggleDone(l){D.done[l]=!D.done[l];save();render()}
 function addNote(){const t=document.getElementById("nt").value.trim(),b=document.getElementById("nb").value.trim();if(!t&&!b)return;D.notes.unshift({id:Date.now(),t:t||"Untitled",b,d:new Date().toLocaleDateString()});save();render()}
 function delNote(id){if(confirm("Delete this note?")){D.notes=D.notes.filter(n=>n.id!==id);save();render()}}
+/* Ages in millions of years (Ma). Approximate; check stratigraphy.org for revisions. */
+const EARTH=4540;
+const EONS=[[4540,4000,"#6b4a3a"],[4000,2500,"#8a6d4b"],[2500,538.8,"#a38f66"],[538.8,0,"#c9b38a"]];
+const EVENTS=[
+["Formation of Earth",4540,"Earth formed about 4,540 million years ago."],
+["Oldest widely accepted evidence of life",3500,"Microbial structures and chemical traces from around 3,500 Ma. Older claims exist and are debated."],
+["Great Oxidation Event",2400,"Free oxygen began to build up in the atmosphere, around 2,400 Ma."],
+["Start of the Cambrian",538.8,"The Phanerozoic Eon begins. Boundary age follows the ICS chart and may be revised."],
+["First land plants (approx.)",470,"Earliest evidence of land plants dates to the Ordovician, around 470 Ma."],
+["First dinosaurs (approx.)",230,"The earliest dinosaurs appear in the Late Triassic, roughly 230 Ma."],
+["Non-avian dinosaur extinction",66,"The end-Cretaceous mass extinction, about 66 Ma. Birds, which are living dinosaurs, survived."],
+["Origin of Homo sapiens (approx.)",0.3,"The oldest fossils assigned to our species are about 300,000 years old."],
+["Start of the Holocene",0.0117,"About 11,700 years ago. All written history sits inside this sliver."]];
+let CK=6;
+function clk(a){const s=(EARTH-a)/EARTH*86400,b=86400-s,p=n=>String(n).padStart(2,"0"),h=Math.floor(s/3600),m=Math.floor(s%3600/60),c=Math.floor(s%60);
+return b<120?{t:p(h)+":"+p(m)+":"+p(c),n:b<1?"less than 1 second before midnight":b.toFixed(1)+" seconds before midnight"}:{t:p(h)+":"+p(m),n:""}}
+function pt(f,r){const a=2*Math.PI*f;return[150+r*Math.sin(a),150-r*Math.cos(a)]}
+function arc(f0,f1,col){const p=pt(f0,104),q=pt(f1,104);return `<path d="M${p[0].toFixed(1)} ${p[1].toFixed(1)} A104 104 0 ${f1-f0>.5?1:0} 1 ${q[0].toFixed(1)} ${q[1].toFixed(1)}" fill="none" stroke="${col}" stroke-width="14"/>`}
+function selClock(i){CK=i;render()}
+function clockHTML(){const f=a=>(EARTH-a)/EARTH,e=EVENTS[CK],c=clk(e[1]);
+const lab=[[150,24,"00:00"],[262,154,"06:00"],[150,284,"12:00"],[38,154,"18:00"]].map(l=>`<text x="${l[0]}" y="${l[1]}" fill="#a39a88" font-size="11" text-anchor="middle" font-family="system-ui">${l[2]}</text>`).join("");
+const dots=EVENTS.map((x,i)=>{const p=pt(f(x[1]),104);return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i===CK?7:4.5}" fill="${i===CK?"#ffffff":"#1c1b1a"}" stroke="#e8dfcc" stroke-width="2" onclick="selClock(${i})"/>`}).join("");
+return `<div class="card"><h3>The Deep Time Clock</h3><p class="sub">Earth’s 4.54 billion years squeezed into one day. Midnight is the birth of Earth; the next midnight is today.</p>
+<svg class="ck" viewBox="0 0 300 300">${EONS.map(x=>arc(f(x[0]),f(x[1]),x[2])).join("")}${lab}${dots}<text x="150" y="152" fill="#e8dfcc" font-size="${c.t.length>5?24:30}" text-anchor="middle" font-family="Georgia,serif">${c.t}</text><text x="150" y="172" fill="#a39a88" font-size="10" text-anchor="middle" font-family="system-ui">on the 24-hour clock</text></svg>
+<h3>${e[0]}</h3><div class="tag">${e[1]} Ma · ${c.t}${c.n?" ("+c.n+")":""}</div><p class="sub">${e[2]}</p>
+${EVENTS.map((x,i)=>`<div class="ev tap ${i===CK?"on":""}" onclick="selClock(${i})"><b>${clk(x[1]).t}</b><span>${x[0]}</span></div>`).join("")}
+<div class="tag" style="margin-top:8px">Ring colours: Hadean, Archean, Proterozoic, Phanerozoic. Tap a dot or a row.</div></div>`}
 function view(){
 const t=V.t;
 if(t==="home"){const s=score("fossil1");return `<h1>DEEP TIME</h1><p class="sub">Paleontology &amp; Evolutionary Biology Academy</p>
 <div class="card tap" onclick="go('lesson',{id:'fossil1'})"><div class="tag">CONTINUE · YEAR 1 · INTRODUCTION TO PALEONTOLOGY</div><h3>What is a fossil?</h3><div class="tag">${D.done.fossil1?"Completed":"Not completed"} · Quiz ${s.c}/${s.t}</div></div>
 <div class="card"><h3>Your progress</h3><div class="bar"><i style="width:${doneN()/total()*100}%"></i></div><div class="tag">${doneN()} of ${total()} lessons ready are complete · ${D.notes.length} notes</div></div>
-<div class="card"><h3>3D Fossil Museum</h3><p class="sub">Open your own 3D viewer to rotate and study fossil models.</p><a class="btn" style="text-decoration:none;display:inline-block" href="https://lalindajayasena.github.io/Fossil-Viewer/" target="_blank" rel="noopener">Open 3D Viewer</a></div>
+${clockHTML()}<div class="card"><h3>3D Fossil Museum</h3><p class="sub">Open your own 3D viewer to rotate and study fossil models.</p><a class="btn" style="text-decoration:none;display:inline-block" href="https://lalindajayasena.github.io/Fossil-Viewer/" target="_blank" rel="noopener">Open 3D Viewer</a></div>
 <h2>Coming in later phases</h2><p class="sub">Geological timeline · Fossil encyclopedia · Examinations · Research library · Sri Lankan paleontology · Laboratory</p>`}
 if(t==="uni")return `<h1>University</h1><p class="sub">A proposed self-study curriculum, not an accredited degree.</p>`+YEARS.map((y,yi)=>`<h2>${y.n}</h2>`+y.m.map((m,mi)=>{const L=MODLESSONS[yi+"-"+mi]||[];return `<div class="card tap row" onclick="go('mod',{y:${yi},m:${mi}})"><div><h3>${m}</h3><div class="tag">${L.length?L.length+" lesson ready":"Lessons planned"}</div></div><span>›</span></div>`}).join("")).join("");
 if(t==="mod"){const m=YEARS[V.y].m[V.m],L=MODLESSONS[V.y+"-"+V.m]||[];return `<button class="back" onclick="go('uni')">‹ University</button><h1>${m}</h1><p class="sub">${YEARS[V.y].n}</p>`+(L.length?L.map(id=>`<div class="card tap row" onclick="go('lesson',{id:'${id}'})"><div><h3>${LESSONS[id].title}</h3><div class="tag">${D.done[id]?"Completed":"Open lesson"}</div></div><span>›</span></div>`).join(""):`<div class="card">Lessons for this module are planned for a later build.</div>`)}
@@ -105,4 +140,5 @@ function render(){document.getElementById("app").innerHTML=view();
 const m={home:"home",uni:"uni",mod:"uni",lesson:"uni",notes:"notes",prog:"prog"}[V.t];
 document.getElementById("nav").innerHTML=[["home","🏛️","Home"],["uni","🎓","University"],["notes","📓","Notebook"],["prog","📊","Progress"]].map(b=>`<button class="${m===b[0]?"on":""}" onclick="go('${b[0]}')"><span>${b[1]}</span>${b[2]}</button>`).join("")}
 render();
+if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0){addEventListener("load",()=>{try{navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}})}
 </script></body></html>
