@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Deep Time</title>
+<style>
+:root{--bg:#1c1b1a;--card:#262422;--line:#3a3733;--tx:#e8dfcc;--mu:#a39a88;--ac:#c9b38a;--ok:#8fb08a;--bad:#c97b6b;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 Georgia,"Times New Roman",serif}
+#app{padding:16px 16px 96px;max-width:720px;margin:0 auto}
+h1{font-size:26px;margin:8px 0 2px;letter-spacing:.5px}
+h2{font-size:20px;color:var(--ac);margin:22px 0 6px}
+h3{font-size:16px;margin:0 0 4px}
+.sub{color:var(--mu);font-size:14px;margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tap{cursor:pointer}
+.tag{font:12px system-ui,sans-serif;color:var(--mu)}
+.btn{background:var(--ac);color:#1c1b1a;border:0;border-radius:8px;padding:10px 14px;font:600 14px system-ui,sans-serif;margin:6px 6px 0 0}
+.btn.g{background:none;color:var(--ac);border:1px solid var(--ac)}
+a{color:var(--ac)}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#141312;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;background:none;border:0;color:var(--mu);padding:10px 0;font:12px system-ui,sans-serif}
+nav button.on{color:var(--ac)}
+nav span{display:block;font-size:20px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--ac)}
+.opt{display:block;width:100%;text-align:left;background:none;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:10px;margin:6px 0;font:15px/1.4 Georgia,serif}
+.opt.ok{border-color:var(--ok);background:#25302a}.opt.no{border-color:var(--bad);background:#3a2623}
+.ex{font-size:14px;color:var(--mu);border-left:3px solid var(--ac);padding-left:10px;margin:8px 0}
+.warn{font:13px system-ui,sans-serif;color:var(--mu);border:1px dashed var(--line);border-radius:8px;padding:8px;margin:10px 0}
+input,textarea{width:100%;background:#141312;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:10px;font:16px Georgia,serif;margin:4px 0}
+.back{background:none;border:0;color:var(--ac);padding:0;font:14px system-ui,sans-serif}
+dt{color:var(--ac);margin-top:8px}dd{margin:0 0 0 12px}
+</style></head><body><div id="app"></div>
+<nav id="nav"></nav>
+<script>
+const YEARS=[
+{n:"Year 1 · Foundations",m:["Introduction to Paleontology","Geological Time and Earth History","Fundamentals of Geology","Fossilization and Taphonomy","Evolutionary Biology","Systematics and Phylogenetics","Comparative Vertebrate Anatomy","Introduction to Paleoecology"]},
+{n:"Year 2 · Evolutionary History",m:["Origin of Life","Precambrian Life","Cambrian Explosion","Paleozoic Evolution","Evolution of Terrestrial Ecosystems","Mesozoic Life","Dinosaur Paleontology","Evolution of Birds","Mammalian Evolution","Cenozoic Evolution"]},
+{n:"Year 3 · Advanced Paleontology",m:["Vertebrate Paleontology","Invertebrate Paleontology","Paleobotany","Micropaleontology","Paleoclimatology","Mass Extinctions","Functional Morphology","Biomechanics","Paleoanthropology","Biogeography"]},
+{n:"Year 4 · Research Training",m:["Advanced Phylogenetics","Quantitative Paleontology","Fossil Preparation","Geochemical Paleontology","Digital Paleontology","3D Morphometrics","Scientific Research Methodology","Scientific Paper Analysis","Research Project","Dissertation"]}];
+const MODLESSONS={"0-0":["fossil1"]};
+const LESSONS={fossil1:{
+title:"What is a fossil?",
+obj:["Define a fossil and explain why the definition is a convention.","Distinguish body fossils from trace fossils.","Describe the main ways remains are preserved.","Explain why the fossil record is biased, and why that does not make it useless."],
+sec:[
+["Introduction",["Paleontology is the scientific study of life in the geological past. It joins two older sciences: geology, which reads the history of rocks, and biology, which studies living things. The word fossil comes from the Latin fossilis, meaning “dug up”.","A fossil is any preserved evidence of an organism that lived in the geological past. Many textbooks use an age of roughly 10,000 years as a rough guide, close to the start of the Holocene. This is a human convention, not a natural boundary: there is no single moment when a bone becomes a fossil."]],
+["Body fossils and trace fossils",["Body fossils are parts of the organism itself: bones, teeth, shells, wood, leaves, pollen. Trace fossils (ichnofossils) record what an organism did, not what it was: footprints, trackways, burrows, bite marks, and coprolites (fossil dung).","Trace fossils are valuable because they show behaviour, such as walking speed or feeding, that a skeleton alone cannot show. A single animal can leave many trace fossils but only one body, so traces can be more common than bodies. Chemical traces, such as molecular remains of lipids, are sometimes called chemical fossils."]],
+["How remains are preserved",["Fossilization is rare. Usually the organism must be buried quickly, protected from scavengers and decay, and then altered slowly by chemistry during burial. The study of everything that happens between death and discovery is called taphonomy.","Common modes of preservation: (1) unaltered hard parts, such as some young shells and tooth enamel; (2) permineralization, where minerals from groundwater fill the tiny spaces in bone or wood; (3) replacement, where original material is dissolved and replaced by another mineral; (4) molds and casts, which are impressions and their fillings; (5) carbonization, a thin film of carbon left on leaves or soft-bodied animals; (6) entombment in amber (fossil tree resin); (7) freezing or drying, which is rare and mostly geologically young."]],
+["Why the fossil record is biased",["Organisms with hard parts fossilize far more easily than soft-bodied ones. Animals living where sediment is building up, such as shallow seas, lakes, and river floodplains, are over-represented. Animals living on eroding highlands are under-represented.","A few sites preserve soft tissues and fine detail. These are called Lagerstätten. Two well-known examples are the Cambrian Burgess Shale of British Columbia, Canada, and the Late Jurassic Solnhofen Limestone of Bavaria, Germany, famous for Archaeopteryx."]],
+["Scientific reasoning",["Good paleontology separates observation from inference. The shape of a tooth is an observation. A claim about diet is an inference that needs support, such as wear patterns or comparison with living animals.","Gaps in the record are real, but their causes are understood and can be modelled. Scientists therefore state conclusions together with their uncertainty, instead of rejecting the record or treating it as complete."]]],
+terms:[["Taphonomy","The study of processes affecting an organism after death, until it is found as a fossil."],["Diagenesis","Physical and chemical changes in sediment and buried remains after burial."],["Body fossil","Preserved part of the organism itself."],["Trace fossil (ichnofossil)","Preserved evidence of behaviour, such as a footprint or burrow."],["Coprolite","Fossilized dung."],["Permineralization","Mineral deposition in the pores of buried tissue."],["Lagerstätte","A site with exceptional fossil preservation."]],
+mis:["“Fossils are always turned completely to stone.” Many fossil bones keep part of their original material, together with added minerals.","“Fossil means dinosaur.” Most fossils are of invertebrates, plants, and microbes.","“Most fossils are dated by radiocarbon.” Radiocarbon dating works only to about 50,000 years. Older fossils are usually dated by measuring the rock layers around them, often volcanic layers, and by their position in the sequence.","“The fossil record is complete” and “the fossil record is useless” are both wrong. It is incomplete, with known biases."],
+sum:["A fossil is preserved evidence of ancient life; the age cut-off is a convention.","Body fossils show anatomy; trace fossils show behaviour.","Preservation needs rapid burial and favourable chemistry, so it is rare and biased.","Scientists handle gaps by modelling the biases and reporting uncertainty."],
+q:[
+["Which of these is a trace fossil?",["A petrified tree trunk","A set of footprints preserved in mudstone","A shell replaced by calcite","An insect trapped in amber"],1,"Footprints record behaviour, not the body. The other three are parts of the organism itself, so they are body fossils."],
+["Why are shelled marine animals so common in the fossil record?",["Soft-bodied animals did not exist before the Cambrian","Hard parts resist decay, and shallow seas bury remains quickly","Fossils can only form in water","Marine animals were always more numerous than land animals"],1,"Hard parts survive decay and shallow seas accumulate sediment. The other options are false or unsupported: soft-bodied life is known from older rocks, and land fossils do form."],
+["Minerals from groundwater fill the pores of a buried bone. What is this process called?",["Carbonization","Permineralization","Freezing","Mold formation"],1,"Permineralization is the filling of pore spaces by minerals. Carbonization leaves a thin carbon film; a mold is an impression."],
+["A student says: “The record is incomplete, so we can conclude nothing about the past.” Best evaluation?",["Correct, incomplete data is worthless","Incorrect, because the record is complete for marine life","Weak reasoning: biases are understood and conclusions are drawn with stated uncertainty","Correct, because fossils are unreliable"],2,"Every science works with incomplete data. The skill is to estimate how the gaps arose and how much they matter."]],
+refs:[["OpenStax, Biology 2e (free university textbook)","https://openstax.org/details/books/biology-2e"],["Paleobiology Database (fossil occurrence data)","https://paleobiodb.org"],["International Commission on Stratigraphy (geological time scale)","https://stratigraphy.org"]]}};
+let D={};try{D=JSON.parse(localStorage.getItem("dt1"))||{}}catch(e){}
+D.done=D.done||{};D.ans=D.ans||{};D.notes=D.notes||[];
+const save=()=>{try{localStorage.setItem("dt1",JSON.stringify(D))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let V={t:"home"};
+const go=(t,x)=>{V=Object.assign({t},x||{});render();scrollTo(0,0)};
+const score=id=>{const a=D.ans[id]||{},L=LESSONS[id];let c=0,n=0;L.q.forEach((q,i)=>{if(a[i]!==undefined){n++;if(a[i]===q[2])c++}});return{c,n,t:L.q.length}};
+const total=()=>Object.keys(LESSONS).length;
+const doneN=()=>Object.keys(D.done).filter(k=>D.done[k]).length;
+function pick(l,q,o){D.ans[l]=D.ans[l]||{};if(D.ans[l][q]!==undefined)return;D.ans[l][q]=o;save();render()}
+function toggleDone(l){D.done[l]=!D.done[l];save();render()}
+function addNote(){const t=document.getElementById("nt").value.trim(),b=document.getElementById("nb").value.trim();if(!t&&!b)return;D.notes.unshift({id:Date.now(),t:t||"Untitled",b,d:new Date().toLocaleDateString()});save();render()}
+function delNote(id){if(confirm("Delete this note?")){D.notes=D.notes.filter(n=>n.id!==id);save();render()}}
+function view(){
+const t=V.t;
+if(t==="home"){const s=score("fossil1");return `<h1>DEEP TIME</h1><p class="sub">Paleontology &amp; Evolutionary Biology Academy</p>
+<div class="card tap" onclick="go('lesson',{id:'fossil1'})"><div class="tag">CONTINUE · YEAR 1 · INTRODUCTION TO PALEONTOLOGY</div><h3>What is a fossil?</h3><div class="tag">${D.done.fossil1?"Completed":"Not completed"} · Quiz ${s.c}/${s.t}</div></div>
+<div class="card"><h3>Your progress</h3><div class="bar"><i style="width:${doneN()/total()*100}%"></i></div><div class="tag">${doneN()} of ${total()} lessons ready are complete · ${D.notes.length} notes</div></div>
+<div class="card"><h3>3D Fossil Museum</h3><p class="sub">Open your own 3D viewer to rotate and study fossil models.</p><a class="btn" style="text-decoration:none;display:inline-block" href="https://lalindajayasena.github.io/Fossil-Viewer/" target="_blank" rel="noopener">Open 3D Viewer</a></div>
+<h2>Coming in later phases</h2><p class="sub">Geological timeline · Fossil encyclopedia · Examinations · Research library · Sri Lankan paleontology · Laboratory</p>`}
+if(t==="uni")return `<h1>University</h1><p class="sub">A proposed self-study curriculum, not an accredited degree.</p>`+YEARS.map((y,yi)=>`<h2>${y.n}</h2>`+y.m.map((m,mi)=>{const L=MODLESSONS[yi+"-"+mi]||[];return `<div class="card tap row" onclick="go('mod',{y:${yi},m:${mi}})"><div><h3>${m}</h3><div class="tag">${L.length?L.length+" lesson ready":"Lessons planned"}</div></div><span>›</span></div>`}).join("")).join("");
+if(t==="mod"){const m=YEARS[V.y].m[V.m],L=MODLESSONS[V.y+"-"+V.m]||[];return `<button class="back" onclick="go('uni')">‹ University</button><h1>${m}</h1><p class="sub">${YEARS[V.y].n}</p>`+(L.length?L.map(id=>`<div class="card tap row" onclick="go('lesson',{id:'${id}'})"><div><h3>${LESSONS[id].title}</h3><div class="tag">${D.done[id]?"Completed":"Open lesson"}</div></div><span>›</span></div>`).join(""):`<div class="card">Lessons for this module are planned for a later build.</div>`)}
+if(t==="lesson"){const L=LESSONS[V.id],a=D.ans[V.id]||{},s=score(V.id);
+return `<button class="back" onclick="go('mod',{y:0,m:0})">‹ Back</button><h1>${L.title}</h1><p class="sub">Year 1 · Introduction to Paleontology</p>
+<div class="warn">Draft written by AI. Check important facts against the references and your tutor before relying on them.</div>
+<h2>Learning objectives</h2><ul>${L.obj.map(o=>`<li>${o}</li>`).join("")}</ul>`+
+L.sec.map(x=>`<h2>${x[0]}</h2>`+x[1].map(p=>`<p>${p}</p>`).join("")).join("")+
+`<h2>Important terminology</h2><dl>${L.terms.map(t=>`<dt>${t[0]}</dt><dd>${t[1]}</dd>`).join("")}</dl>
+<h2>Common misconceptions</h2><ul>${L.mis.map(o=>`<li>${o}</li>`).join("")}</ul>
+<h2>Knowledge summary</h2><ul>${L.sum.map(o=>`<li>${o}</li>`).join("")}</ul>
+<h2>Examination questions</h2>`+L.q.map((q,i)=>`<div class="card"><h3>${i+1}. ${q[0]}</h3>${q[1].map((o,j)=>{let c="";if(a[i]!==undefined){if(j===q[2])c="ok";else if(j===a[i])c="no"}return `<button class="opt ${c}" onclick="pick('${V.id}',${i},${j})">${o}</button>`}).join("")}${a[i]!==undefined?`<div class="ex">${a[i]===q[2]?"Correct. ":"Not quite. "}${q[3]}</div>`:""}</div>`).join("")+
+`<div class="tag">Score: ${s.c} of ${s.t} (${s.n} answered)</div>
+<h2>References and further reading</h2><ul>${L.refs.map(r=>`<li><a href="${r[1]}" target="_blank" rel="noopener">${r[0]}</a></li>`).join("")}</ul>
+<button class="btn" onclick="toggleDone('${V.id}')">${D.done[V.id]?"Mark as not complete":"Mark lesson complete"}</button><button class="btn g" onclick="go('notes')">Open notebook</button>`}
+if(t==="notes")return `<h1>Notebook</h1><p class="sub">Saved only on this phone.</p><div class="card"><input id="nt" placeholder="Title (question, hypothesis, concept)"><textarea id="nb" rows="4" placeholder="Write your note"></textarea><button class="btn" onclick="addNote()">Save note</button></div>`+(D.notes.length?D.notes.map(n=>`<div class="card"><div class="row"><h3>${esc(n.t)}</h3><button class="back" onclick="delNote(${n.id})">Delete</button></div><div class="tag">${n.d}</div><p style="white-space:pre-wrap">${esc(n.b)}</p></div>`).join(""):`<div class="card">No notes yet.</div>`);
+if(t==="prog"){const s=score("fossil1"),weak=s.n&&s.c/s.t<.75;return `<h1>Academic Progress</h1><p class="sub">Stored on this phone.</p>
+<div class="card"><h3>Lessons</h3><div class="bar"><i style="width:${doneN()/total()*100}%"></i></div><div class="tag">${doneN()} of ${total()} available lessons complete</div></div>
+<div class="card"><h3>Quiz scores</h3><div>What is a fossil? — ${s.c}/${s.t} (${s.n} answered)</div></div>
+<div class="card"><h3>Revision needed</h3><div>${weak?"What is a fossil? — score below 75%, review the lesson.":"Nothing flagged."}</div></div>
+<div class="card"><h3>Curriculum</h3><div class="tag">4 years · 38 modules planned</div></div>`}
+}
+function render(){document.getElementById("app").innerHTML=view();
+const m={home:"home",uni:"uni",mod:"uni",lesson:"uni",notes:"notes",prog:"prog"}[V.t];
+document.getElementById("nav").innerHTML=[["home","🏛️","Home"],["uni","🎓","University"],["notes","📓","Notebook"],["prog","📊","Progress"]].map(b=>`<button class="${m===b[0]?"on":""}" onclick="go('${b[0]}')"><span>${b[1]}</span>${b[2]}</button>`).join("")}
+render();
+</script></body></html>
