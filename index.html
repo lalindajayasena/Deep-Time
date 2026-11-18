@@ -41,6 +41,12 @@ dt{color:var(--ac);margin-top:8px}dd{margin:0 0 0 12px}
 .ev{display:flex;gap:10px;padding:8px;border-radius:8px;border:1px solid transparent;font:14px/1.3 system-ui,sans-serif}
 .ev b{min-width:62px;color:var(--ac)}
 .ev.on{border-color:var(--ac);background:#2e2b27}
+.vrow{display:flex;gap:8px;align-items:stretch;margin-top:10px}
+.vb{flex:1;display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--tx);background:linear-gradient(135deg,#34302a,#262422);border:1px solid var(--ac);border-radius:12px;padding:12px}
+.vb .pl{flex:none;width:38px;height:38px;border-radius:50%;background:var(--ac);color:#1c1b1a;display:flex;align-items:center;justify-content:center;font-size:16px}
+.vb b{display:block;font-size:16px;line-height:1.3}
+.vb small{display:block;color:var(--mu);font:12px system-ui,sans-serif;margin-top:2px}
+.vx{flex:none;width:40px;background:none;border:1px solid var(--line);border-radius:12px;color:var(--mu);font-size:16px}
 </style></head><body><div id="app"></div>
 <nav id="nav"></nav>
 <script>
@@ -151,9 +157,17 @@ function exHTML(id){const x=LESSONS[id].ex;return `<h2>Practical exercise</h2><d
 function saveEx(id){const x=LESSONS[id].ex;let b="";x.p.forEach((p,i)=>{b+=p+"\n"+document.getElementById("ex"+i).value.trim()+"\n\n"});D.notes.unshift({id:Date.now(),t:"Exercise: "+x.t,b:b.trim(),d:new Date().toLocaleDateString()});save();alert("Saved to your Notebook.")}
 D.vids=D.vids||{};
 const YT="https://www.youtube.com/";
+function ytLink(u){try{const x=new URL(u),h=x.hostname.replace(/^(www\.|m\.)/,""),g=k=>x.searchParams.get(k);let p="";
+if(h==="youtu.be")p="/watch?v="+x.pathname.slice(1);
+else if(g("list")&&!g("v"))p="/playlist?list="+g("list");
+else if(x.pathname.indexOf("/shorts/")===0)p=x.pathname;
+else if(g("v"))p="/watch?v="+g("v")+(g("list")?"&list="+g("list"):"");
+else return u;
+if(!/android/i.test(navigator.userAgent||""))return u;
+return "intent://www.youtube.com"+p+"#Intent;scheme=https;package=com.google.android.youtube;S.browser_fallback_url="+encodeURIComponent(u)+";end"}catch(e){return u}}
 function videosHTML(c){const L=D.vids[c]||[],q=encodeURIComponent(c==="home"?"paleontology lecture":LESSONS[c].title+" paleontology"),a=(u,t,g)=>`<a class="btn${g?" g":""}" style="text-decoration:none;display:inline-block" href="${u}" target="_blank" rel="noopener">${t}</a>`;
 return `<div class="card"><h3>Videos</h3><p class="sub">Opens in the YouTube app. Videos you downloaded there play offline.</p>${a(YT+"feed/downloads","My downloads (offline)")}${a(YT+"feed/library","My library",1)}${a(YT+"results?search_query="+q,"Search online",1)}
-${L.map((v,i)=>`<div class="row" style="margin-top:8px"><a href="${esc(v.u)}" target="_blank" rel="noopener">▶ ${esc(v.t)}</a><button class="back" onclick="delVid('${c}',${i})">Remove</button></div>`).join("")}
+${L.map((v,i)=>`<div class="vrow"><a class="vb" href="${esc(ytLink(v.u))}"><span class="pl">▶</span><span><b>${esc(v.t)}</b><small>Tap to play in the YouTube app</small></span></a><button class="vx" onclick="delVid('${c}',${i})" aria-label="Remove">✕</button></div>`).join("")}
 <div style="margin-top:10px"><input id="vt_${c}" placeholder="Video title"><input id="vu_${c}" placeholder="Paste YouTube link"><button class="btn" onclick="addVid('${c}')">Add my video</button></div></div>`}
 function addVid(c){const t=document.getElementById("vt_"+c).value.trim(),u=document.getElementById("vu_"+c).value.trim();if(!/^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//.test(u)){alert("Please paste a YouTube link.");return}(D.vids[c]=D.vids[c]||[]).push({t:t||"My video",u});save();render()}
 function delVid(c,i){D.vids[c].splice(i,1);save();render()}
