@@ -149,18 +149,26 @@ refs:[["Behrensmeyer, A.K., Kidwell, S.M. and Gastaldo, R.A. (2000). Taphonomy a
 });
 function exHTML(id){const x=LESSONS[id].ex;return `<h2>Practical exercise</h2><div class="card"><h3>${x.t}</h3><p class="sub">${x.d}</p>${x.p.map((p,i)=>`<div class="tag">${p}</div><textarea id="ex${i}" rows="2"></textarea>`).join("")}<button class="btn" onclick="saveEx('${id}')">Save answers to notebook</button></div>`}
 function saveEx(id){const x=LESSONS[id].ex;let b="";x.p.forEach((p,i)=>{b+=p+"\n"+document.getElementById("ex"+i).value.trim()+"\n\n"});D.notes.unshift({id:Date.now(),t:"Exercise: "+x.t,b:b.trim(),d:new Date().toLocaleDateString()});save();alert("Saved to your Notebook.")}
+D.vids=D.vids||{};
+const YT="https://www.youtube.com/";
+function videosHTML(c){const L=D.vids[c]||[],q=encodeURIComponent(c==="home"?"paleontology lecture":LESSONS[c].title+" paleontology"),a=(u,t,g)=>`<a class="btn${g?" g":""}" style="text-decoration:none;display:inline-block" href="${u}" target="_blank" rel="noopener">${t}</a>`;
+return `<div class="card"><h3>Videos</h3><p class="sub">Opens in the YouTube app. Videos you downloaded there play offline.</p>${a(YT+"feed/downloads","My downloads (offline)")}${a(YT+"feed/library","My library",1)}${a(YT+"results?search_query="+q,"Search online",1)}
+${L.map((v,i)=>`<div class="row" style="margin-top:8px"><a href="${esc(v.u)}" target="_blank" rel="noopener">▶ ${esc(v.t)}</a><button class="back" onclick="delVid('${c}',${i})">Remove</button></div>`).join("")}
+<div style="margin-top:10px"><input id="vt_${c}" placeholder="Video title"><input id="vu_${c}" placeholder="Paste YouTube link"><button class="btn" onclick="addVid('${c}')">Add my video</button></div></div>`}
+function addVid(c){const t=document.getElementById("vt_"+c).value.trim(),u=document.getElementById("vu_"+c).value.trim();if(!/^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//.test(u)){alert("Please paste a YouTube link.");return}(D.vids[c]=D.vids[c]||[]).push({t:t||"My video",u});save();render()}
+function delVid(c,i){D.vids[c].splice(i,1);save();render()}
 function view(){
 const t=V.t;
 if(t==="home"){const s=score("fossil1");return `<h1>DEEP TIME</h1><p class="sub">Paleontology &amp; Evolutionary Biology Academy</p>
 <div class="card tap" onclick="go('lesson',{id:'fossil1'})"><div class="tag">CONTINUE · YEAR 1 · INTRODUCTION TO PALEONTOLOGY</div><h3>What is a fossil?</h3><div class="tag">${D.done.fossil1?"Completed":"Not completed"} · Quiz ${s.c}/${s.t}</div></div>
 <div class="card"><h3>Your progress</h3><div class="bar"><i style="width:${doneN()/total()*100}%"></i></div><div class="tag">${doneN()} of ${total()} lessons ready are complete · ${D.notes.length} notes</div></div>
-<div class="card"><h3>3D Fossil Museum</h3><p class="sub">Open your own 3D viewer to rotate and study fossil models.</p><a class="btn" style="text-decoration:none;display:inline-block" href="https://lalindajayasena.github.io/Fossil-Viewer/" target="_blank" rel="noopener">Open 3D Viewer</a></div>
+<div class="card"><h3>3D Fossil Museum</h3><p class="sub">Open your own 3D viewer to rotate and study fossil models.</p><a class="btn" style="text-decoration:none;display:inline-block" href="https://lalindajayasena.github.io/Fossil-Viewer/" target="_blank" rel="noopener">Open 3D Viewer</a></div>${videosHTML("home")}
 <h2>Coming in later phases</h2><p class="sub">Geological timeline · Fossil encyclopedia · Examinations · Research library · Sri Lankan paleontology · Laboratory</p>`}
 if(t==="uni")return `<h1>University</h1><p class="sub">A proposed self-study curriculum, not an accredited degree.</p>`+YEARS.map((y,yi)=>`<h2>${y.n}</h2>`+y.m.map((m,mi)=>{const L=MODLESSONS[yi+"-"+mi]||[];return `<div class="card tap row" onclick="go('mod',{y:${yi},m:${mi}})"><div><h3>${m}</h3><div class="tag">${L.length?L.length+" lesson ready":"Lessons planned"}</div></div><span>›</span></div>`}).join("")).join("");
 if(t==="mod"){const m=YEARS[V.y].m[V.m],L=MODLESSONS[V.y+"-"+V.m]||[];return `<button class="back" onclick="go('uni')">‹ University</button><h1>${m}</h1><p class="sub">${YEARS[V.y].n}</p>`+(L.length?L.filter(id=>LESSONS[id]).map(id=>`<div class="card tap row" onclick="go('lesson',{id:'${id}'})"><div><h3>${LESSONS[id].title}</h3><div class="tag">${D.done[id]?"Completed":"Open lesson"}</div></div><span>›</span></div>`).join("")+L.filter(id=>!LESSONS[id]).map(id=>`<div class="card" style="opacity:.55"><h3>${PLAN[id]||id}</h3><div class="tag">Planned</div></div>`).join(""):`<div class="card">Lessons for this module are planned for a later build.</div>`)}
 if(t==="lesson"){const L=LESSONS[V.id],a=D.ans[V.id]||{},s=score(V.id);
 return `<button class="back" onclick="go('mod',{y:0,m:0})">‹ Back</button><h1>${L.title}</h1><p class="sub">Year 1 · Introduction to Paleontology</p>
-<div class="warn">Draft written by AI. Check important facts against the references and your tutor before relying on them.</div>
+<div class="warn">Draft written by AI. Check important facts against the references and your tutor before relying on them.</div>${videosHTML(V.id)}
 <h2>Learning objectives</h2><ul>${L.obj.map(o=>`<li>${o}</li>`).join("")}</ul>`+
 L.sec.map(x=>`<h2>${x[0]}</h2>`+x[1].map(p=>`<p>${p}</p>`).join("")).join("")+
 `<h2>Important terminology</h2><dl>${L.terms.map(t=>`<dt>${t[0]}</dt><dd>${t[1]}</dd>`).join("")}</dl>
