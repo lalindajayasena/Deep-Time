@@ -17,7 +17,7 @@ h1{font-size:26px;margin:8px 0 2px;letter-spacing:.5px}
 h2{font-size:20px;color:var(--ac);margin:22px 0 6px}
 h3{font-size:16px;margin:0 0 4px}
 .sub{color:var(--mu);font-size:14px;margin:0 0 14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0}
+.card{background:rgba(38,36,34,.9);border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .tap{cursor:pointer}
 .tag{font:12px system-ui,sans-serif;color:var(--mu)}
@@ -46,8 +46,18 @@ dt{color:var(--ac);margin-top:8px}dd{margin:0 0 0 12px}
 .vb .pl{flex:none;width:38px;height:38px;border-radius:50%;background:var(--ac);color:#1c1b1a;display:flex;align-items:center;justify-content:center;font-size:16px}
 .vb b{display:block;font-size:16px;line-height:1.3}
 .vb small{display:block;color:var(--mu);font:12px system-ui,sans-serif;margin-top:2px}
+#w1,#w2{position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s}
+#w1.on,#w2.on{opacity:1}
+#dim{position:fixed;inset:0;z-index:-1;pointer-events:none;background:#141312;opacity:.55}
+h1,h2,.sub,.back{text-shadow:0 1px 5px #000}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.th{aspect-ratio:9/16;border-radius:10px;border:2px solid var(--line);background:#141312 center/cover;position:relative;display:flex;align-items:flex-end}
+.th.on{border-color:var(--ac)}
+.th span{font:11px system-ui,sans-serif;background:rgba(0,0,0,.6);width:100%;padding:3px 4px;border-radius:0 0 8px 8px;color:#fff}
+.th .x{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.7);color:#fff}
+input[type=range]{padding:0;accent-color:var(--ac)}
 .vx{flex:none;width:40px;background:none;border:1px solid var(--line);border-radius:12px;color:var(--mu);font-size:16px}
-</style></head><body><div id="app"></div>
+</style></head><body><div id="w1"></div><div id="w2"></div><div id="dim"></div><div id="app"></div>
 <nav id="nav"></nav>
 <script>
 const YEARS=[
@@ -171,8 +181,53 @@ ${L.map((v,i)=>`<div class="vrow"><a class="vb" href="${esc(ytLink(v.u))}"><span
 <div style="margin-top:10px"><input id="vt_${c}" placeholder="Video title"><input id="vu_${c}" placeholder="Paste YouTube link"><button class="btn" onclick="addVid('${c}')">Add my video</button></div></div>`}
 function addVid(c){const t=document.getElementById("vt_"+c).value.trim(),u=document.getElementById("vu_"+c).value.trim();if(!/^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//.test(u)){alert("Please paste a YouTube link.");return}(D.vids[c]=D.vids[c]||[]).push({t:t||"My video",u});save();render()}
 function delVid(c,i){D.vids[c].splice(i,1);save();render()}
+D.wp=Object.assign({mode:"open",cur:"strata",dim:55},D.wp||{});
+let MY=[],wpFlip=0,wpT=null;
+const rnd=s=>()=>(s=(s*1664525+1013904223)%4294967296)/4294967296;
+const SV=b=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1600" preserveAspectRatio="xMidYMid slice">'+b+'</svg>';
+const GR=(id,a,b,c)=>'<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+a+'"/><stop offset="1" stop-color="'+b+'"/></linearGradient></defs><rect width="720" height="1600" fill="url(#'+id+')"/>';
+const GEN={
+strata:()=>{const r=rnd(7),c=["#5b4636","#7a5c43","#9c7a56","#b89a73","#6d5340","#4a3a2e","#a78963","#835f46"];let b='<rect width="720" height="1600" fill="#3a2e25"/>',y=-20;for(let i=0;i<24;i++){y+=40+r()*50;const a=6+r()*22,f=.004+r()*.008,p=r()*6;let d="M0 "+(y+a*Math.sin(p)).toFixed(1);for(let x=20;x<=740;x+=20)d+=" L"+x+" "+(y+a*Math.sin(x*f*6+p)).toFixed(1);b+='<path d="'+d+' L720 1600 L0 1600Z" fill="'+c[Math.floor(r()*c.length)]+'"/>'}return SV(b)},
+ammonite:()=>{let b=GR("g","#1c1b1a","#2c2822"),d="",k=0.15,R=t=>6*Math.exp(k*t);for(let t=0;t<=26;t+=.1)d+=(t?" L":"M")+(360+R(t)*Math.cos(t)).toFixed(1)+" "+(800+R(t)*Math.sin(t)).toFixed(1);b+='<path d="'+d+'" fill="none" stroke="#c9b38a" stroke-width="3" opacity=".7"/>';for(let t=6.3;t<=26;t+=.13){const o=R(t),i=R(t-6.2832);b+='<line x1="'+(360+o*Math.cos(t)).toFixed(1)+'" y1="'+(800+o*Math.sin(t)).toFixed(1)+'" x2="'+(360+i*Math.cos(t)).toFixed(1)+'" y2="'+(800+i*Math.sin(t)).toFixed(1)+'" stroke="#c9b38a" stroke-width="1.5" opacity=".4"/>'}return SV(b)},
+contour:()=>{let b=GR("g","#1c1b1a","#2a2620");[[200,500],[520,1150]].forEach((c,j)=>{for(let k=1;k<=22;k++){let d="";for(let a=0;a<=6.3;a+=.1){const r=k*20+14*Math.sin(a*3+k*.4+j)+9*Math.sin(a*5-k*.3);d+=(a?" L":"M")+(c[0]+r*Math.cos(a)).toFixed(1)+" "+(c[1]+r*Math.sin(a)).toFixed(1)}b+='<path d="'+d+'Z" fill="none" stroke="#c9b38a" stroke-width="1.3" opacity=".3"/>'}});return SV(b)},
+fern:()=>{let b=GR("g","#16201a","#26352a");const fr=(x0,y0,ang,len,sc)=>{for(let i=0;i<=60;i++){const t=i/60,a=ang+t*.9,x=x0+Math.sin(ang)*len*t+Math.sin(t*2)*60*sc,y=y0-len*t*Math.cos(ang*.2),ll=(80*(1-t)+10)*sc,w=2.5*sc;[1,-1].forEach(s=>{b+='<line x1="'+x.toFixed(1)+'" y1="'+y.toFixed(1)+'" x2="'+(x+Math.cos(a)*ll*s).toFixed(1)+'" y2="'+(y-Math.sin(a+1.1)*ll*.35+ll*.2).toFixed(1)+'" stroke="#8fa37a" stroke-width="'+w+'" stroke-linecap="round" opacity=".5"/>'})}};fr(220,1500,.1,1350,1);fr(520,1550,-.15,900,.8);return SV(b)},
+amber:()=>{const r=rnd(11);let b='<defs><radialGradient id="g" cx=".5" cy=".45" r=".8"><stop offset="0" stop-color="#f2b84b"/><stop offset=".55" stop-color="#b8661a"/><stop offset="1" stop-color="#3a1c08"/></radialGradient></defs><rect width="720" height="1600" fill="url(#g)"/>';for(let i=0;i<46;i++){const x=r()*720,y=r()*1600,s=3+r()*16;b+='<circle cx="'+x.toFixed(0)+'" cy="'+y.toFixed(0)+'" r="'+s.toFixed(1)+'" fill="#fff3d0" fill-opacity=".08" stroke="#fff3d0" stroke-opacity=".35"/>'}return SV(b)},
+cosmos:()=>{const r=rnd(5);let b=GR("g","#05060d","#1a1030")+'<defs><filter id="f"><feGaussianBlur stdDeviation="60"/></filter></defs><ellipse cx="200" cy="500" rx="260" ry="180" fill="#5a2a8a" opacity=".5" filter="url(#f)"/><ellipse cx="520" cy="1100" rx="280" ry="200" fill="#1f6f86" opacity=".4" filter="url(#f)"/>';for(let i=0;i<220;i++)b+='<circle cx="'+(r()*720).toFixed(0)+'" cy="'+(r()*1600).toFixed(0)+'" r="'+(.4+r()*1.6).toFixed(1)+'" fill="#fff" opacity="'+(.3+r()*.7).toFixed(2)+'"/>';return SV(b)},
+dunes:()=>{let b=GR("g","#2d1f14","#6b4a2a");const c=["#a67c4e","#946b3f","#835b34","#704b29","#5f3d1f","#4d3018"];for(let i=0;i<10;i++){const y=500+i*110,a=40+i*4;let d="M0 "+y;for(let x=0;x<=720;x+=20)d+=" L"+x+" "+(y+a*Math.sin(x*.008+i*1.7)).toFixed(1);b+='<path d="'+d+' L720 1600 L0 1600Z" fill="'+c[Math.min(i,5)]+'"/>'}return SV(b)},
+ocean:()=>{const r=rnd(3);let b=GR("g","#0e4a5c","#04141c");for(let i=0;i<6;i++){const x=60+i*120+r()*40;b+='<polygon points="'+x+',0 '+(x+50)+',0 '+(x+200)+',1100 '+(x-120)+',1100" fill="#fff" opacity=".05"/>'}for(let i=0;i<70;i++)b+='<circle cx="'+(r()*720).toFixed(0)+'" cy="'+(r()*1600).toFixed(0)+'" r="'+(1+r()*3).toFixed(1)+'" fill="#bfeaf2" opacity=".25"/>';b+='<path d="M0 1500 Q180 1440 360 1500 T720 1480 L720 1600 L0 1600Z" fill="#0a1d24"/>';return SV(b)},
+forest:()=>{const r=rnd(9);let b=GR("g","#0f2418","#1d3a22");for(let i=0;i<16;i++){const x=r()*720,w=20+r()*50,o=.25+r()*.5;b+='<rect x="'+x.toFixed(0)+'" y="0" width="'+w.toFixed(0)+'" height="1600" fill="#2b3b25" opacity="'+o.toFixed(2)+'"/>';for(let y=40;y<1600;y+=46)b+='<path d="M'+(x+w/2).toFixed(0)+' '+y+' l'+(w/3).toFixed(0)+' 12 l-'+(w/3).toFixed(0)+' 12 l-'+(w/3).toFixed(0)+' -12z" fill="#0c1a10" opacity="'+(o*.8).toFixed(2)+'"/>'}b+='<defs><radialGradient id="m"><stop offset="0" stop-color="#cfe8cf" stop-opacity=".25"/><stop offset="1" stop-color="#cfe8cf" stop-opacity="0"/></radialGradient></defs><ellipse cx="360" cy="1250" rx="420" ry="160" fill="url(#m)"/>';return SV(b)},
+impact:()=>{let b=GR("g","#140707","#c0481c")+'<defs><linearGradient id="s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#ffe2a8"/></linearGradient><radialGradient id="o"><stop offset="0" stop-color="#fff6d8"/><stop offset=".4" stop-color="#ffb347" stop-opacity=".8"/><stop offset="1" stop-color="#ff6a00" stop-opacity="0"/></radialGradient></defs><polygon points="720,0 740,0 470,640 440,640" fill="url(#s)" opacity=".8"/><circle cx="455" cy="640" r="70" fill="url(#o)"/><path d="M0 1300 L120 1220 L240 1290 L380 1190 L520 1280 L640 1210 L720 1260 L720 1600 L0 1600Z" fill="#120a07"/>';return SV(b)},
+iceage:()=>{const r=rnd(13);let b=GR("g","#0b1d33","#8fb4d2");b+='<path d="M0 1200 L140 980 L260 1120 L420 900 L560 1090 L720 960 L720 1600 L0 1600Z" fill="#dfeaf4" opacity=".85"/><path d="M0 1400 L180 1260 L330 1370 L520 1230 L720 1350 L720 1600 L0 1600Z" fill="#f4f8fc"/>';for(let i=0;i<140;i++)b+='<circle cx="'+(r()*720).toFixed(0)+'" cy="'+(r()*1250).toFixed(0)+'" r="'+(1+r()*3).toFixed(1)+'" fill="#fff" opacity="'+(.4+r()*.5).toFixed(2)+'"/>';return SV(b)},
+limestone:()=>SV('<defs><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".008 .035" numOctaves="4" seed="4"/><feColorMatrix values="0 0 0 0 .22 0 0 0 0 .18 0 0 0 0 .13 0 0 0 1.5 -.45"/></filter></defs><rect width="720" height="1600" fill="#b8ad96"/><rect width="720" height="1600" filter="url(#n)"/>')};
+const WP=[["strata","Strata"],["ammonite","Ammonite"],["contour","Contours"],["fern","Fern frond"],["amber","Amber"],["cosmos","Cosmos"],["dunes","Dunes"],["ocean","Cambrian sea"],["forest","Coal forest"],["impact","Impact sky"],["iceage","Ice age"],["limestone","Limestone"]];
+const wpC={};
+function wpUrl(id){if(id[0]==="u"){const m=MY.find(x=>x.id===id);return m?m.url:null}return wpC[id]||(wpC[id]="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(GEN[id]()))}
+const wpIds=()=>WP.map(x=>x[0]).concat(MY.map(x=>x.id));
+function applyWP(id){const u=wpUrl(id);if(!u){id="strata";return applyWP(id)}D.wp.cur=id;save();const a=document.getElementById(wpFlip?"w1":"w2"),b=document.getElementById(wpFlip?"w2":"w1");a.style.backgroundImage='url("'+u+'")';a.classList.add("on");b.classList.remove("on");wpFlip^=1;document.getElementById("dim").style.opacity=D.wp.dim/100}
+function nextWP(){const a=wpIds();applyWP(a[(a.indexOf(D.wp.cur)+1)%a.length]);if(V.t==="wp")render()}
+function wpSchedule(){clearInterval(wpT);const ms={min1:6e4,min10:6e5}[D.wp.mode];if(ms)wpT=setInterval(nextWP,ms)}
+function wpStart(){const a=wpIds(),m=D.wp.mode;if(m==="open")D.wp.cur=a[Math.floor(Math.random()*a.length)];else if(m==="daily")D.wp.cur=a[Math.floor(Date.now()/864e5)%a.length];else if(a.indexOf(D.wp.cur)<0)D.wp.cur=a[0];applyWP(D.wp.cur);wpSchedule()}
+function pickWP(id){applyWP(id);render()}
+function setMode(v){D.wp.mode=v;save();wpSchedule()}
+function setDim(v){D.wp.dim=+v;save();document.getElementById("dim").style.opacity=D.wp.dim/100}
+const IDB={db:null,open(){return new Promise((res,rej)=>{if(this.db)return res(this.db);const r=indexedDB.open("dt_wp",1);r.onupgradeneeded=()=>r.result.createObjectStore("p",{keyPath:"id"});r.onsuccess=()=>{this.db=r.result;res(r.result)};r.onerror=()=>rej(r.error)})},
+async all(){const d=await this.open();return new Promise((res,rej)=>{const q=d.transaction("p").objectStore("p").getAll();q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})},
+async put(o){const d=await this.open();return new Promise((res,rej)=>{const t=d.transaction("p","readwrite");t.objectStore("p").put(o);t.oncomplete=res;t.onerror=()=>rej(t.error)})},
+async del(id){const d=await this.open();return new Promise((res,rej)=>{const t=d.transaction("p","readwrite");t.objectStore("p").delete(id);t.oncomplete=res;t.onerror=()=>rej(t.error)})}};
+function shrink(f){return new Promise((res,rej)=>{const i=new Image(),r=URL.createObjectURL(f);i.onload=()=>{const c=document.createElement("canvas");c.width=720;c.height=1600;const x=c.getContext("2d"),k=Math.max(720/i.naturalWidth,1600/i.naturalHeight),w=i.naturalWidth*k,h=i.naturalHeight*k;x.drawImage(i,(720-w)/2,(1600-h)/2,w,h);URL.revokeObjectURL(r);res(c.toDataURL("image/jpeg",.82))};i.onerror=rej;i.src=r})}
+async function addPics(fl){let bad=0;for(const f of Array.from(fl)){try{await IDB.put({id:"u"+Date.now()+Math.floor(Math.random()*1e3),url:await shrink(f)})}catch(e){bad++}}try{MY=await IDB.all()}catch(e){}if(bad)alert(bad+" picture(s) could not be added.");render()}
+async function delPic(id){if(!confirm("Remove this picture?"))return;try{await IDB.del(id);MY=await IDB.all()}catch(e){}if(D.wp.cur===id)applyWP("strata");render()}
+function fillThumbs(){document.querySelectorAll(".th").forEach(e=>{const u=wpUrl(e.dataset.k);if(u)e.style.backgroundImage='url("'+u+'")'})}
+function wpHTML(){const o=(v,t)=>`<option value="${v}"${D.wp.mode===v?" selected":""}>${t}</option>`,th=(id,n,x)=>`<div class="th${D.wp.cur===id?" on":""}" data-k="${id}" onclick="pickWP('${id}')"><span>${n}</span>${x?`<button class="x" onclick="event.stopPropagation();delPic('${id}')">✕</button>`:""}</div>`;
+return `<h1>Style</h1><p class="sub">Wallpapers for the app background.</p>
+<div class="card"><h3>Change wallpaper</h3><select id="wm" onchange="setMode(this.value)" style="width:100%;padding:10px;background:#141312;color:var(--tx);border:1px solid var(--line);border-radius:8px;font:16px Georgia,serif">${o("fixed","Keep the one I choose")}${o("open","New one each time I open the app")}${o("min1","Every 1 minute")}${o("min10","Every 10 minutes")}${o("daily","New one every day")}</select>
+<h3 style="margin-top:12px">Dimming (easier to read)</h3><input type="range" min="10" max="85" value="${D.wp.dim}" oninput="setDim(this.value)">
+<button class="btn" onclick="nextWP()">Next wallpaper</button><label class="btn g" style="display:inline-block">Add my pictures<input type="file" accept="image/*" multiple hidden onchange="addPics(this.files)"></label></div>
+<div class="card"><h3>Wallpapers</h3><p class="sub">Tap one to use it now. Pictures sized 720 × 1600 fit your screen best.</p><div class="grid">${WP.map(w=>th(w[0],w[1])).join("")}${MY.map((m,i)=>th(m.id,"My picture "+(i+1),1)).join("")}</div></div>`}
+IDB.all().then(a=>{MY=a}).catch(()=>{}).then(()=>{wpStart();if(V.t==="wp")render()});
 function view(){
 const t=V.t;
+if(t==="wp")return wpHTML();
 if(t==="home"){const s=score("fossil1");return `<h1>DEEP TIME</h1><p class="sub">Paleontology &amp; Evolutionary Biology Academy</p>
 <div class="card tap" onclick="go('lesson',{id:'fossil1'})"><div class="tag">CONTINUE · YEAR 1 · INTRODUCTION TO PALEONTOLOGY</div><h3>What is a fossil?</h3><div class="tag">${D.done.fossil1?"Completed":"Not completed"} · Quiz ${s.c}/${s.t}</div></div>
 <div class="card"><h3>Your progress</h3><div class="bar"><i style="width:${doneN()/total()*100}%"></i></div><div class="tag">${doneN()} of ${total()} lessons ready are complete · ${D.notes.length} notes</div></div>
@@ -199,9 +254,9 @@ if(t==="prog"){const sc=Object.keys(LESSONS).map(i=>[i,score(i)]),weak=sc.filter
 <div class="card"><h3>Revision needed</h3><div>${weak.length?weak.map(x=>LESSONS[x[0]].title+" — below 75%, review the lesson.").join("<br>"):"Nothing flagged."}</div></div>
 <div class="card"><h3>Curriculum</h3><div class="tag">4 years · 38 modules planned</div></div>`}
 }
-function render(){document.getElementById("app").innerHTML=view();
-const m={home:"home",uni:"uni",mod:"uni",lesson:"uni",notes:"notes",prog:"prog"}[V.t];
-document.getElementById("nav").innerHTML=[["home","🏛️","Home"],["uni","🎓","University"],["notes","📓","Notebook"],["prog","📊","Progress"]].map(b=>`<button class="${m===b[0]?"on":""}" onclick="go('${b[0]}')"><span>${b[1]}</span>${b[2]}</button>`).join("")}
+function render(){document.getElementById("app").innerHTML=view();if(V.t==="wp")fillThumbs();
+const m={home:"home",uni:"uni",mod:"uni",lesson:"uni",notes:"notes",prog:"prog",wp:"wp"}[V.t];
+document.getElementById("nav").innerHTML=[["home","🏛️","Home"],["uni","🎓","University"],["notes","📓","Notebook"],["prog","📊","Progress"],["wp","🎨","Style"]].map(b=>`<button class="${m===b[0]?"on":""}" onclick="go('${b[0]}')"><span>${b[1]}</span>${b[2]}</button>`).join("")}
 render();
 if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0){addEventListener("load",()=>{try{navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}})}
 </script></body></html>
