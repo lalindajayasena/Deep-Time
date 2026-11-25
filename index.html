@@ -58,8 +58,20 @@ h1,h2,.sub,.back{text-shadow:0 1px 5px #000}
 input[type=range]{padding:0;accent-color:var(--ac)}
 table{width:100%;border-collapse:collapse;font:13px/1.4 system-ui,sans-serif;margin:8px 0}td,th{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}th{color:var(--ac)}
 details.tn{border:1px solid var(--line);border-radius:8px;padding:8px;margin:8px 0}details.tn summary{color:var(--ac)}.tx{white-space:pre-wrap;font-size:15px;margin:8px 0}
+#sb{position:fixed;right:3px;top:calc(env(safe-area-inset-top,0px) + 64px);bottom:calc(env(safe-area-inset-bottom,0px) + 130px);width:38px;z-index:30;display:none;flex-direction:column;align-items:center;opacity:.4;transition:opacity .3s;pointer-events:none}
+#sb.act{opacity:1}
+#sb .e{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--ac);background:rgba(20,19,18,.9);color:var(--ac);font-size:13px;pointer-events:auto}
+#st{flex:1;position:relative;width:100%;margin:4px 0}
+#sh{position:absolute;left:2px;top:0;width:34px;height:48px;border-radius:12px;background:var(--ac);color:#1c1b1a;display:flex;align-items:center;justify-content:center;font-size:18px;touch-action:none;pointer-events:auto;box-shadow:0 1px 6px #000}
+#sbub{position:fixed;right:50px;max-width:62vw;padding:6px 10px;background:rgba(20,19,18,.96);border:1px solid var(--ac);border-radius:8px;font:13px/1.3 system-ui,sans-serif;color:var(--tx);display:none;z-index:31;pointer-events:none}
+#ctb{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);z-index:30;display:none;background:rgba(20,19,18,.92);color:var(--ac);border:1px solid var(--ac);border-radius:20px;padding:8px 14px;font:600 13px system-ui,sans-serif}
+#sheet{display:none;position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6)}
+.sh-in{position:absolute;left:0;right:0;bottom:0;max-height:75vh;overflow:auto;background:#1c1b1a;border-top:1px solid var(--ac);border-radius:14px 14px 0 0;padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+.ci{padding:12px 4px;border-bottom:1px solid var(--line);font-size:16px}
+h2.cl{cursor:pointer;scroll-margin-top:12px}h2.cl::after{content:" ▾";color:var(--mu)}h2.cl[data-c="1"]::after{content:" ▸"}
 .vx{flex:none;width:40px;background:none;border:1px solid var(--line);border-radius:12px;color:var(--mu);font-size:16px}
 </style></head><body><div id="w1"></div><div id="w2"></div><div id="dim"></div><div id="app"></div>
+<div id="sb"><button class="e" onclick="toTop()" aria-label="Go to top">▲</button><div id="st"><div id="sh" aria-label="Drag to scroll">⇅</div></div><button class="e" onclick="toBottom()" aria-label="Go to bottom">▼</button></div><div id="sbub"></div><button id="ctb" onclick="openContents()">☰ Contents</button><div id="sheet" onclick="if(event.target===this)closeSheet()"></div>
 <nav id="nav"></nav>
 <script>
 const YEARS=[
@@ -444,6 +456,19 @@ return `<button class="back" onclick="go('home')">‹ Home</button><h1>Save my p
 5. Create it, and copy the Client ID. Paste it above and tap Save Client ID.
 6. Tap Save to Google Drive and sign in. Google’s menus change, so tell me where you get stuck.</div></details></div>
 <div class="card"><h3>What is saved</h3><p class="sub">Completed lessons, quiz and short answers, tutor-review marks, Notebook, Tutor notes, your video links, and wallpaper settings. Your own wallpaper pictures are not included.</p></div>`}
+const COL={},SB={drag:false,hide:null};
+function sbUpdate(){try{const sb=document.getElementById("sb"),H=document.documentElement.scrollHeight,W=innerHeight,show=H>W*2.2;sb.style.display=show?"flex":"none";document.getElementById("ctb").style.display=(V.t==="lesson")?"block":"none";if(!show)return;const tr=document.getElementById("st"),th=document.getElementById("sh"),max=Math.max(0,tr.clientHeight-th.offsetHeight),r=H>W?scrollY/(H-W):0;th.style.top=Math.max(0,Math.min(max,r*max))+"px"}catch(e){}}
+function sbWake(){try{const sb=document.getElementById("sb");sb.classList.add("act");clearTimeout(SB.hide);if(!SB.drag)SB.hide=setTimeout(()=>sb.classList.remove("act"),1800)}catch(e){}}
+function secAt(){const hs=[...document.querySelectorAll("#app > h1, #app > h2")];let n="";hs.forEach(h=>{if(h.getBoundingClientRect().top<=innerHeight*.35)n=h.textContent});return n}
+function sbDrag(e){const tr=document.getElementById("st"),th=document.getElementById("sh"),b=tr.getBoundingClientRect(),max=Math.max(1,b.height-th.offsetHeight),H=document.documentElement.scrollHeight,W=innerHeight;let y=e.clientY-b.top-th.offsetHeight/2;y=Math.max(0,Math.min(max,y));th.style.top=y+"px";scrollTo(0,(y/max)*(H-W));const bu=document.getElementById("sbub");bu.textContent=secAt()||"…";bu.style.top=Math.max(8,e.clientY-20)+"px";bu.style.display="block"}
+(function(){try{const th=document.getElementById("sh");th.addEventListener("pointerdown",e=>{SB.drag=true;try{th.setPointerCapture(e.pointerId)}catch(x){}document.getElementById("sb").classList.add("act");sbDrag(e);e.preventDefault()});th.addEventListener("pointermove",e=>{if(SB.drag)sbDrag(e)});const end=()=>{if(!SB.drag)return;SB.drag=false;document.getElementById("sbub").style.display="none";sbWake()};th.addEventListener("pointerup",end);th.addEventListener("pointercancel",end);addEventListener("scroll",()=>{if(!SB.drag)sbUpdate();sbWake()},{passive:true});addEventListener("resize",sbUpdate)}catch(e){}})();
+function toTop(){scrollTo({top:0,behavior:"smooth"})}
+function toBottom(){scrollTo({top:document.documentElement.scrollHeight,behavior:"smooth"})}
+function enhance(){try{const app=document.getElementById("app");if(V.t==="lesson"){const key=V.id;COL[key]=COL[key]||{};[...app.querySelectorAll(":scope > h2")].forEach((h,i)=>{h.id="h"+i;h.classList.add("cl");const nodes=[];let n=h.nextElementSibling;while(n&&n.tagName!=="H2"&&n.tagName!=="BUTTON"){nodes.push(n);n=n.nextElementSibling}const t=h.textContent,ap=()=>{const c=COL[key][t];nodes.forEach(x=>{x.style.display=c?"none":""});h.dataset.c=c?"1":""};ap();h.onclick=()=>{COL[key][t]=!COL[key][t];ap();sbUpdate()}})}}catch(e){}setTimeout(sbUpdate,0)}
+function openContents(){const hs=[...document.querySelectorAll("#app > h2")],sh=document.getElementById("sheet");sh.innerHTML='<div class="sh-in"><div class="row"><b>Contents</b><button class="back" onclick="closeSheet()">Close</button></div><div><button class="btn g" onclick="colAll(1)">Collapse all</button><button class="btn g" onclick="colAll(0)">Expand all</button></div>'+hs.map((h,i)=>'<div class="ci" onclick="goSec('+i+')">'+esc(h.textContent)+"</div>").join("")+"</div>";sh.style.display="block"}
+function closeSheet(){document.getElementById("sheet").style.display="none"}
+function goSec(i){const h=document.getElementById("h"+i);closeSheet();if(!h)return;if(h.dataset.c)h.click();h.scrollIntoView({behavior:"smooth",block:"start"})}
+function colAll(v){closeSheet();const key=V.id;COL[key]=COL[key]||{};document.querySelectorAll("#app > h2").forEach(h=>{COL[key][h.textContent]=!!v});enhance();scrollTo(0,0)}
 function view(){
 const t=V.t;
 if(t==="wp")return wpHTML();if(t==="sl")return slHTML();if(t==="bk")return bkHTML();if(t==="plan")return planHTML();
@@ -473,7 +498,7 @@ if(t==="prog"){const sc=Object.keys(LESSONS).map(i=>[i,score(i)]),weak=sc.filter
 <div class="card"><h3>Revision needed</h3><div>${weak.length?weak.map(x=>LESSONS[x[0]].title+" — below 75%, review the lesson.").join("<br>"):"Nothing flagged."}</div></div>
 ${mistakesHTML()}<div class="card"><h3>Curriculum</h3><div class="tag">4 years · 38 modules planned</div></div>`}
 }
-function render(){document.getElementById("app").innerHTML=view();if(V.t==="wp")fillThumbs();if(V.t==="bk")gsiLoad().catch(()=>{});
+function render(){document.getElementById("app").innerHTML=view();if(V.t==="wp")fillThumbs();if(V.t==="bk")gsiLoad().catch(()=>{});enhance();
 const m={home:"home",uni:"uni",mod:"uni",lesson:"uni",notes:"notes",prog:"prog",wp:"wp",sl:"home",bk:"home",plan:"uni"}[V.t];
 document.getElementById("nav").innerHTML=[["home","🏛️","Home"],["uni","🎓","University"],["notes","📓","Notebook"],["prog","📊","Progress"],["wp","🎨","Style"]].map(b=>`<button class="${m===b[0]?"on":""}" onclick="go('${b[0]}')"><span>${b[1]}</span>${b[2]}</button>`).join("")}
 render();
